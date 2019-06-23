@@ -17,32 +17,6 @@ void MyMesh::GenerateCircle(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 		then call the AddTri function to generate a_nSubdivision number of faces
 	*/
 
-	// Calculate the angle of difference (in radians) between all subdivision points
-	float proportion = (((2.0 * PI) * (360.0 / (float)a_nSubdivisions)) / 360.0);
-
-	// Calculate the first point for the circle and store it
-	vector3 lastPoint = vector3(a_fRadius * (cos(proportion * 1)), a_fRadius * (sin(proportion * 1)), 0.0);
-	vector3 currentPoint;
-
-	// Create all the triangles for the circle
-	for (int i = 2; i < a_nSubdivisions + 1; i++)
-	{
-		// Calculate the current point of the subdivision
-		currentPoint = vector3(a_fRadius * (cos(proportion * i)), a_fRadius * (sin(proportion * i)), 0.0);
-
-		// Add triangle where
-		//	a is the previously calculated point,
-		//	b is the current calculated point,
-		//	c is the origin (center of circle)
-		AddTri(lastPoint, currentPoint, vector3(0));
-
-		// Set this calculated point to the last point for the next triangle
-		lastPoint = currentPoint;
-	}
-
-	// Finish with the last triangle
-	AddTri(lastPoint, vector3(a_fRadius * (cos(proportion * 1)), a_fRadius * (sin(proportion * 1)), 0.0), vector3(0));
-
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();

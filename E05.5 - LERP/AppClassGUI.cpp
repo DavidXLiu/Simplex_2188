@@ -28,7 +28,7 @@ void Application::DrawGUI(void)
 		ImGui::Begin(sAbout.c_str(), (bool*)0, window_flags);
 		{
 			ImGui::Text("Programmer: \n");
-			ImGui::TextColored(v4Color, m_sProgrammer.c_str()); 
+			ImGui::TextColored(v4Color, m_sProgrammer.c_str());
 			ImGui::Text("FrameRate: %.2f [FPS] -> %.3f [ms/frame]\n",
 				ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 			ImGui::Text("Control:\n");

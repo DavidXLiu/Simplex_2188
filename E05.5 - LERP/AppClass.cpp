@@ -52,34 +52,14 @@ void Application::Display(void)
 	fTimer += m_pSystem->GetDeltaTime(uClock); //get the delta time for that timer
 
 	//calculate the current position
-	vector3 v3CurrentPos; // The current position
-	vector3 v3StartPos; // The starting position of the current path
-	vector3 v3EndPos; // The ending position of the current path
-	static uint pathNum = 0; // The current path
-	v3StartPos = m_stopsList[pathNum]; // Set the start position
-	v3EndPos = m_stopsList[(pathNum + 1) % m_stopsList.size()]; // Set the end position
+	vector3 v3CurrentPos;
+	
 
-	// Set the duration for each path, increasing speed on each one
-	float fDuration = 4.0f / (pathNum + 1);
 
-	// Calculate the current percentage along the path relevant to time
-	float fPercentage = MapValue(fTimer, 0.0f, fDuration, 0.0f, 1.0f);
+
 
 	//your code goes here
-	v3CurrentPos = glm::lerp(v3StartPos, v3EndPos, fPercentage);
-
-	// Check end of path
-	if (fPercentage >= 1.0f)
-	{
-		// Change to next path
-		pathNum++;
-		
-		// Restart timer
-		fTimer = m_pSystem->GetDeltaTime(uClock);
-
-		// Make sure path num does not exceed the number of paths
-		pathNum %= m_stopsList.size();
-	}
+	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
 	//-------------------
 	
 
