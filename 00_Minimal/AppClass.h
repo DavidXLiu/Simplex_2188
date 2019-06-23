@@ -1,6 +1,6 @@
 /*----------------------------------------------
 Programmer: Alberto Bobadilla (labigm@gmail.com)
-Date: 2017/05
+Date: 2017/06
 ----------------------------------------------*/
 #ifndef __APPLICATIONCLASS_H_
 #define __APPLICATIONCLASS_H_
@@ -10,24 +10,39 @@ Date: 2017/05
 #include "ControllerConfiguration.h"
 #include "imgui\ImGuiObject.h"
 
+#include "MyEntityManager.h"
+
+namespace Simplex
+{
+	//Adding Application to the Simplex namespace
 class Application
 {
-	String m_sProgrammer = "Exercise code by David Liu - dxl4041@g.rit.edu";
-	std::vector<vector3> m_stopsList;
-	Simplex::Model* m_pModel = nullptr;
+	MyEntityManager* m_pEntityMngr = nullptr; //Entity Manager
+
 private:
 	static ImGuiObject gui; //GUI object
-	
+	bool m_bGUI_Main = true; //show Main GUI window?
+	bool m_bGUI_Console = false; //show Credits GUI window?
+	bool m_bGUI_Test = false; //show Test GUI window?
+	bool m_bGUI_Controller = false; //show Controller GUI window?
+
 	uint m_uRenderCallCount = 0; //count of render calls per frame
 	uint m_uControllerCount = 0; //count of controllers connected
+
+	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+
+	bool m_bFocused = true; //is the window focused?
+
+	float m_fMovementSpeed = 0.1f; //how fast the camera will move
 
 	vector3 m_v3Mouse = vector3(); //position of the mouse in the window
 	bool m_bFPC = false;// First Person Camera flag
 	bool m_bArcBall = false;// Arcball flag
 	quaternion m_qArcBall; //ArcBall quaternion
-	
+
 	vector4 m_v4ClearColor; //Color of the scene
 	bool m_bRunning = false; //Is app running?
+	bool m_bModifier = false; //is shift pressed?
 
 	sf::Window* m_pWindow = nullptr; //SFML window
 	SystemSingleton* m_pSystem = nullptr; //Singleton of the system
@@ -36,6 +51,10 @@ private:
 	CameraManager* m_pCameraMngr = nullptr; //Singleton for the camera manager
 	ControllerInput* m_pController[8]; //Controller
 	uint m_uActCont = 0; //Active Controller of the Application
+
+	sf::SoundBuffer m_soundBuffer; //buffer to play sound from
+	sf::Sound m_sound; //sound effect
+	sf::Music m_soundBGM; //background music
 
 public:
 #pragma region Constructor / Run / Destructor
@@ -47,18 +66,18 @@ public:
 	Application();
 	/*
 	USAGE: Initializes the window and rendering context
-	ARGUMENTS: 
+	ARGUMENTS:
 	-	String a_sApplicationName -> Name of the window if blank will use project Name
 	-	int size -> formated size, relate to BTO_RESOLUTIONS
 	-	bool a_bFullscreen = false -> is the window fullscreen?
 	-	bool a_bBorderless = false -> is the window borderless?
 	OUTPUT: ---
 	*/
-	void Init(String a_sApplicationName = "", int a_uSize = BTO_RESOLUTIONS::RES_C_1280x720_16x9_HD, 
+	void Init(String a_sApplicationName = "", int a_uSize = BTO_RESOLUTIONS::RES_C_1280x720_16x9_HD,
 		bool a_bFullscreen = false, bool a_bBorderless = false);
 	/*
 	USAGE: Initializes the window and rendering context
-	ARGUMENTS: 
+	ARGUMENTS:
 	-	String a_sApplicationName = "" -> Name of the window if blank will use project Name
 	-	uint a_nWidth -> Window Width
 	-	uint a_nHeight -> Window Height
@@ -137,13 +156,13 @@ private:
 	void ClearScreen(vector4 a_v4ClearColor = vector4(-1.0f));
 	/*
 	USAGE: Will initialize the controllers generically
-	ARGUMENTS: ---
+	ARGUMENTS:
 	OUTPUT: ---
 	*/
 	void InitControllers(void);
 	/*
 	USAGE: Will Release the controllers
-	ARGUMENTS: ---
+	ARGUMENTS:
 	OUTPUT: ---
 	*/
 	void ReleaseControllers(void);
@@ -176,7 +195,7 @@ private:
 	*/
 	void CameraRotation(float a_fSpeed = 0.005f);
 #pragma endregion
-	
+
 #pragma region Process Events
 	/*
 	USAGE: Resizes the window
@@ -254,7 +273,7 @@ private:
 	*/
 	void InitIMGUI(void);
 	/*
-	USAGE: Draw gui elements
+	USAGE: Draw GUI elements
 	ARGUMENTS: ---
 	OUTPUT: ---
 	*/
@@ -306,6 +325,8 @@ private:
 	Application& operator=(Application const& input);
 #pragma endregion
 };
+
+}//namespace Simplex
 
 #endif //__APPLICATIONCLASS_H_
 

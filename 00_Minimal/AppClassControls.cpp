@@ -1,4 +1,5 @@
 #include "AppClass.h"
+using namespace Simplex;
 //Mouse
 void Application::ProcessMouseMovement(sf::Event a_event)
 {
@@ -71,8 +72,14 @@ void Application::ProcessKeyPressed(sf::Event a_event)
 	{
 	default: break;
 	case sf::Keyboard::Space:
+		m_sound.play();
+		break;
+	case sf::Keyboard::LShift:
+	case sf::Keyboard::RShift:
+		m_bModifier = true;
 		break;
 	}
+	
 	//gui
 	gui.io.KeysDown[a_event.key.code] = true;
 	gui.io.KeyCtrl = a_event.key.control;
@@ -99,24 +106,6 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 		break;
 	case sf::Keyboard::F4:
 		m_pCameraMngr->SetCameraMode(CAM_ORTHO_X);
-		break;
-	case sf::Keyboard::F5:
-		m_pMesh->GenerateCone(1.0f, 2.0f, 10, C_CYAN);
-		break;
-	case sf::Keyboard::F6:
-		m_pMesh->GenerateCylinder(1.0f, 2.0f, 10, C_CYAN);
-		break;
-	case sf::Keyboard::F7:
-		m_pMesh->GenerateTube(1.0f, 0.7f, 1.0f, 10, C_CYAN);
-		break;
-	case sf::Keyboard::F8:
-		m_pMesh->GenerateSphere(1.0f, 10, C_CYAN);
-		break;
-	case sf::Keyboard::F9:
-		m_pMesh->GenerateTorus(1.0f, 0.6f, 360, 360, C_CYAN);
-		break;
-	case sf::Keyboard::F10:
-		m_pMesh->GenerateCube(2.0f, C_CYAN);
 		break;
 	case sf::Keyboard::F:
 		bFPSControl = !bFPSControl;
@@ -148,6 +137,9 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 			}
 		}
 		break;
+	case sf::Keyboard::LShift:
+	case sf::Keyboard::RShift:
+		m_bModifier = false;
 	}
 
 	//gui
@@ -163,6 +155,7 @@ void Application::ProcessJoystickConnected(uint nController)
 		return;
 
 	bool bConnected = sf::Joystick::isConnected(nController);
+	m_bGUI_Controller = bConnected;
 	if (bConnected)
 	{
 		SafeDelete(m_pController[nController]);
@@ -402,40 +395,45 @@ void Application::CameraRotation(float a_fSpeed)
 //Keyboard
 void Application::ProcessKeyboard(void)
 {
+	if (!m_bFocused)
+		return;
 	/*
 	This is used for things that are continuously happening,
 	for discreet on/off use ProcessKeyboardPressed/Released
 	*/
 #pragma region Camera Position
-	float fSpeed = 1.0f;
-	float fMultiplier = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
+	bool bMultiplier = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
 		sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);
 
-	if (fMultiplier)
-		fSpeed *= 5.0f;
+	float fMultiplier = 1.0f;
+
+	if (bMultiplier)
+		fMultiplier = 5.0f;
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-		m_pCameraMngr->MoveForward(fSpeed);
+		m_pCameraMngr->MoveForward(m_fMovementSpeed * fMultiplier);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		m_pCameraMngr->MoveForward(-fSpeed);
+		m_pCameraMngr->MoveForward(-m_fMovementSpeed * fMultiplier);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-		m_pCameraMngr->MoveSideways(-fSpeed);
+		m_pCameraMngr->MoveSideways(-m_fMovementSpeed * fMultiplier);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		m_pCameraMngr->MoveSideways(fSpeed);
+		m_pCameraMngr->MoveSideways(m_fMovementSpeed * fMultiplier);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-		m_pCameraMngr->MoveVertical(-fSpeed);
+		m_pCameraMngr->MoveVertical(-m_fMovementSpeed * fMultiplier);
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-		m_pCameraMngr->MoveVertical(fSpeed);
+		m_pCameraMngr->MoveVertical(m_fMovementSpeed * fMultiplier);
 #pragma endregion
 }
 //Joystick
 void Application::ProcessJoystick(void)
 {
+	if (!m_bFocused)
+		return;
 	/*
 	This is used for things that are continuously happening,
 	for discreet on/off use ProcessJoystickPressed/Released
