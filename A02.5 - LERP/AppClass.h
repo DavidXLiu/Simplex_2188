@@ -20,6 +20,10 @@ class Application
 {
 	uint m_uOrbits = 0; //number of shapes starting at 3 and increasing in sides
 	std::vector<uint> m_shapeList; //shape index for circles
+	std::vector<std::vector<vector3>> m_stopShapeList; // Stops for each of the shapes
+	std::vector<float> m_fTimers; // Timers for each of the orbits
+	std::vector<uint> m_uClocks; // Clocks for each of the orbits
+	std::vector<uint> m_uPathNums; // Current path number for each of the orbits
 	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
 	
 private:
