@@ -54,21 +54,29 @@ void Application::Display(void)
 		break;
 	case 2:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPerspective(false); // Set to orthographic
 		break;
 	case 3:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPositionTargetAndUpward(vector3(25.0f, 0.0f, 0.0f), vector3(0.0f, 0.0f, 0.0f), vector3(0.0f, 0.0f, -1.0f)); // Set camera on the side away from shapes and set z-axis to be up
 		break;
 	case 4:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPosition(vector3(0.0f, 0.0f, -15.0f)); // Set camera in back
 		break;
 	case 5:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPosition(vector3(0.0f, 0.0f, -15.0f)); // Set camera in back
+		m_pCamera->SetNearFar(vector2(5.0f, 100.0f)); // Set near of the camera to be farther
 		break;
 	case 6:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetPosition(vector3(0.0f, 0.0f, -15.0f)); // Set camera in back
+		m_pCamera->SetNearFar(vector2(0.001f, 10.0f)); // Set far of the camera to be nearer
 		break;
 	case 7:
 		m_pCamera->ResetCamera();
+		m_pCamera->SetUp(vector3(0.0f, -1.0f, 0.0f)); // Set up in the opposite direction
 		break;
 	}
 
