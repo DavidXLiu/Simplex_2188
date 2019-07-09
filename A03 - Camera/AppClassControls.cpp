@@ -370,6 +370,7 @@ void Application::CameraRotation(float a_fSpeed)
 	}
 	//Change the Yaw and the Pitch of the camera
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
+	m_pCamera->SetTarget(vector3(m_pCamera->GetTarget().x - fAngleY, m_pCamera->GetTarget().y - fAngleX, 0.0f)); // Add directional movement to old target
 }
 //Keyboard
 void Application::ProcessKeyboard(void)
@@ -390,6 +391,10 @@ void Application::ProcessKeyboard(void)
 		m_pCamera->MoveForward(fSpeed);
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 		m_pCamera->MoveForward(-fSpeed);
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) // Make the camera move sideways when key is pressed
+		m_pCamera->MoveSideways(fSpeed);
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) // Make the camera move sideways when key is pressed
+		m_pCamera->MoveSideways(-fSpeed);
 #pragma endregion
 }
 //Joystick

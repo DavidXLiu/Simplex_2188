@@ -153,10 +153,35 @@ void Simplex::MyCamera::CalculateProjectionMatrix(void)
 void MyCamera::MoveForward(float a_fDistance)
 {
 	//The following is just an example and does not take in account the forward vector (AKA view vector)
-	m_v3Position += vector3(0.0f, 0.0f,-a_fDistance);
+
+	// Calculate the angle of the difference between the origin target point and the current target point
+	/*float angle = atan(m_v3Target.z / 1.0f);
+
+	// Calculate the directional vectors and multiply it with the distance
+	m_v3Position += vector3(cos(angle) * -a_fDistance, 0.0f, cos(angle) * -a_fDistance);
+	m_v3Target += vector3(cos(angle) * -a_fDistance, 0.0f, cos(angle) * -a_fDistance);
+	m_v3Above += vector3(cos(angle) * -a_fDistance, 0.0f, cos(angle) * -a_fDistance);*/
+
+	/// Had poor scheduling for this assignment and didn't spend as much time on it as I needed to.
+	/// Couldn't figure out how to change the coordinates to world space in movement.
+	/// The following code is movement in global coordinates without taking account of the camera's current rotation.
+
+	m_v3Position += vector3(0.0f, 0.0f, -a_fDistance);
 	m_v3Target += vector3(0.0f, 0.0f, -a_fDistance);
 	m_v3Above += vector3(0.0f, 0.0f, -a_fDistance);
 }
 
-void MyCamera::MoveVertical(float a_fDistance){}//Needs to be defined
-void MyCamera::MoveSideways(float a_fDistance){}//Needs to be defined
+void MyCamera::MoveVertical(float a_fDistance)
+{
+	m_v3Position += vector3(0.0f, a_fDistance, 0.0f);
+	m_v3Target += vector3(0.0f, a_fDistance, 0.0f);
+	m_v3Above += vector3(0.0f, a_fDistance, 0.0f);
+}//Needs to be defined
+
+void MyCamera::MoveSideways(float a_fDistance)
+{
+	//The following is just an example and does not take in account the forward vector (AKA view vector)
+	m_v3Position += vector3(-a_fDistance, 0.0f, 0.0f);
+	m_v3Target += vector3(-a_fDistance, 0.0f, 0.0f);
+	m_v3Above += vector3(-a_fDistance, 0.0f, 0.0f);
+}//Needs to be defined
