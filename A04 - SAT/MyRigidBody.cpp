@@ -287,6 +287,182 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
 
+	// Axes for objects A and B
+	vector3 axesA[3];
+	vector3 axesB[3];
+
+	// Calculate axes for object A
+	axesA[0] = vector3(m_m4ToWorld * vector4(AXIS_X, 0.0f));
+	axesA[0] = glm::normalize(axesA[0]);
+	axesA[1] = vector3(m_m4ToWorld * vector4(AXIS_Y, 0.0f));
+	axesA[1] = glm::normalize(axesA[1]);
+	axesA[2] = vector3(m_m4ToWorld * vector4(AXIS_Z, 0.0f));
+	axesA[2] = glm::normalize(axesA[2]);
+
+	// Calculate axes for object B
+	axesB[0] = vector3(a_pOther->m_m4ToWorld * vector4(AXIS_X, 0.0f));
+	axesB[0] = glm::normalize(axesB[0]);
+	axesB[1] = vector3(a_pOther->m_m4ToWorld * vector4(AXIS_Y, 0.0f));
+	axesB[1] = glm::normalize(axesB[1]);
+	axesB[2] = vector3(a_pOther->m_m4ToWorld * vector4(AXIS_Z, 0.0f));
+	axesB[2] = glm::normalize(axesB[2]);
+
+	// Extents for objects A and B
+	float extentsA[3];
+	float extentsB[3];
+
+	// Calculate extents for object A
+	extentsA[0] = GetHalfWidth().x;
+	extentsA[1] = GetHalfWidth().y;
+	extentsA[2] = GetHalfWidth().z;
+
+	// Calculate extents for object B
+	extentsB[0] = a_pOther->GetHalfWidth().x;
+	extentsB[1] = a_pOther->GetHalfWidth().y;
+	extentsB[2] = a_pOther->GetHalfWidth().z;
+
+	// Calculate rotation matrix expressing object B in object A's coordinates
+	matrix3 rotMat;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			rotMat[i][j] = glm::dot(axesA[i], axesB[j]);
+
+	// Calculate translation vector
+	vector3 translation = a_pOther->GetCenterGlobal() - GetCenterGlobal();
+
+	// Bring translation vector into object A's coordinates
+	translation = vector3(glm::dot(translation, axesA[0]), glm::dot(translation, axesA[1]), glm::dot(translation, axesA[2]));
+
+	// Get an absolute value matrix of the rotation matrix
+	matrix3 rotMatAbs;
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			rotMatAbs[i][j] = glm::abs(rotMat[i][j]);
+
+	/// 15 Separating Axis Tests
+	float projectionA;
+	float projectionB;
+
+	// AX
+	projectionA = extentsA[0];
+	projectionB = extentsB[0] * rotMatAbs[0][0] + extentsB[1] * rotMatAbs[0][1] + extentsB[2] * rotMatAbs[0][2];
+	
+	if (glm::abs(translation[0])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AX;
+
+	// AY
+	projectionA = extentsA[1];
+	projectionB = extentsB[0] * rotMatAbs[1][0] + extentsB[1] * rotMatAbs[1][1] + extentsB[2] * rotMatAbs[1][2];
+	
+	if (glm::abs(translation[1])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AY;
+
+	// AZ
+	projectionA = extentsA[2];
+	projectionB = extentsB[0] * rotMatAbs[2][0] + extentsB[1] * rotMatAbs[2][1] + extentsB[2] * rotMatAbs[2][2];
+	
+	if (glm::abs(translation[2])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AZ;
+
+	// BX
+	projectionA = extentsA[0] * rotMatAbs[0][0] + extentsA[1] * rotMatAbs[1][0] + extentsA[2] * rotMatAbs[2][0];
+	projectionB = extentsB[0];
+	
+	if (glm::abs(translation[0] * rotMat[0][0] + translation[1] * rotMat[1][0] + translation[2] * rotMat[2][0])
+		> projectionA + projectionB)
+			return eSATResults::SAT_BX;
+
+	// BY
+	projectionA = extentsA[0] * rotMatAbs[0][1] + extentsA[1] * rotMatAbs[1][1] + extentsA[2] * rotMatAbs[2][1];
+	projectionB = extentsB[1];
+	
+	if (glm::abs(translation[0] * rotMat[0][1] + translation[1] * rotMat[1][1] + translation[2] * rotMat[2][1])
+		> projectionA + projectionB)
+			return eSATResults::SAT_BY;
+
+	// BZ
+	projectionA = extentsA[0] * rotMatAbs[0][2] + extentsA[1] * rotMatAbs[1][2] + extentsA[2] * rotMatAbs[2][2];
+	projectionB = extentsB[2];
+	
+	if (glm::abs(translation[0] * rotMat[0][2] + translation[1] * rotMat[1][2] + translation[2] * rotMat[2][2])
+		> projectionA + projectionB)
+			return eSATResults::SAT_BZ;
+
+	// AX x BX
+	projectionA = extentsA[1] * rotMatAbs[2][0] + extentsA[2] * rotMatAbs[1][0];
+	projectionB = extentsB[1] * rotMatAbs[0][2] + extentsB[2] * rotMatAbs[0][1];
+	
+	if (glm::abs(translation[2] * rotMat[1][0] - translation[1] * rotMat[2][0])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AXxBX;
+
+	// AX x BY
+	projectionA = extentsA[1] * rotMatAbs[2][1] + extentsA[2] * rotMatAbs[1][1];
+	projectionB = extentsB[0] * rotMatAbs[0][2] + extentsB[2] * rotMatAbs[0][0];
+	
+	if (glm::abs(translation[2] * rotMat[1][1] - translation[1] * rotMat[2][1])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AXxBY;
+
+	// AX x BZ
+	projectionA = extentsA[1] * rotMatAbs[2][2] + extentsA[2] * rotMatAbs[1][2];
+	projectionB = extentsB[0] * rotMatAbs[0][1] + extentsB[1] * rotMatAbs[0][0];
+	
+	if (glm::abs(translation[2] * rotMat[1][2] - translation[1] * rotMat[2][2])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AXxBZ;
+
+	// AY x BX
+	projectionA = extentsA[0] * rotMatAbs[2][0] + extentsA[2] * rotMatAbs[0][0];
+	projectionB = extentsB[1] * rotMatAbs[1][2] + extentsB[2] * rotMatAbs[1][1];
+	
+	if (glm::abs(translation[0] * rotMat[2][0] - translation[2] * rotMat[0][0])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AYxBX;
+
+	// AY x BY
+	projectionA = extentsA[0] * rotMatAbs[2][1] + extentsA[2] * rotMatAbs[0][1];
+	projectionB = extentsB[0] * rotMatAbs[1][2] + extentsB[2] * rotMatAbs[1][0];
+
+	if (glm::abs(translation[0] * rotMat[2][1] - translation[2] * rotMat[0][1])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AYxBY;
+
+	// AY x BZ
+	projectionA = extentsA[0] * rotMatAbs[2][2] + extentsA[2] * rotMatAbs[0][2];
+	projectionB = extentsB[0] * rotMatAbs[1][1] + extentsB[1] * rotMatAbs[1][0];
+	
+	if (glm::abs(translation[0] * rotMat[2][2] - translation[2] * rotMat[0][2])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AYxBZ;
+
+	// AZ x BX
+	projectionA = extentsA[0] * rotMatAbs[1][0] + extentsA[1] * rotMatAbs[0][0];
+	projectionB = extentsB[1] * rotMatAbs[2][2] + extentsB[2] * rotMatAbs[2][1];
+	
+	if (glm::abs(translation[1] * rotMat[0][0] - translation[0] * rotMat[1][0])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AZxBX;
+
+	// AZ x BY
+	projectionA = extentsA[0] * rotMatAbs[1][1] + extentsA[1] * rotMatAbs[0][1];
+	projectionB = extentsB[0] * rotMatAbs[2][2] + extentsB[2] * rotMatAbs[2][0];
+	
+	if (glm::abs(translation[1] * rotMat[0][1] - translation[0] * rotMat[1][1])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AZxBY;
+
+	// AZ x BZ
+	projectionA = extentsA[0] * rotMatAbs[1][2] + extentsA[1] * rotMatAbs[0][2];
+	projectionB = extentsB[0] * rotMatAbs[2][1] + extentsB[1] * rotMatAbs[2][0];
+
+	if (glm::abs(translation[1] * rotMat[0][2] - translation[0] * rotMat[1][2])
+		> projectionA + projectionB)
+			return eSATResults::SAT_AZxBZ;
+
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
 }
